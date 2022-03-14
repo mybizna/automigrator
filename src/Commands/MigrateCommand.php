@@ -51,7 +51,7 @@ class MigrateCommand extends Command
         }
 
         foreach ($models->sortBy('order') as $model) {
-            $this->migrate($model['object']);
+            $this->migrateModel($model['object']);
         }
     }
 
