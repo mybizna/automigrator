@@ -2,12 +2,12 @@
 
 namespace DummyNamespace;
 
-use Legodion\Lucid\Traits\HasNewFactory;
 use Faker\Generator;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Legodion\Lucid\Traits\HasNewFactory;
 
 class DummyClass extends Authenticatable
 {

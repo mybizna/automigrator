@@ -2,10 +2,10 @@
 
 namespace Legodion\Lucid\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use Legodion\Lucid\Commands\MigrateCommand;
 use Legodion\Lucid\Commands\ModelCommand;
 use Legodion\Lucid\Commands\ResourceCommand;
-use Illuminate\Support\ServiceProvider;
 
 class LucidServiceProvider extends ServiceProvider
 {
