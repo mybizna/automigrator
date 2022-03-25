@@ -35,8 +35,8 @@ class ModelCommand extends GeneratorCommand
     protected function getStub()
     {
         return $this->argument('name') == 'User'
-            ? __DIR__ . '/../Stubs/UserModel.php'
-            : __DIR__ . '/../Stubs/Model.php';
+            ? __DIR__ . '/../../stubs/UserModel.php'
+            : __DIR__ . '/../../stubs/Model.php';
     }
 
     protected function getDefaultNamespace($rootNamespace)
