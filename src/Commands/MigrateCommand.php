@@ -34,7 +34,7 @@ class MigrateCommand extends Command
         return 0;
     }
 
-    public function migrateModels()
+    protected function migrateModels()
     {
         $path = is_dir(app_path('Models')) ? app_path('Models') : app_path();
         $namespace = app()->getNamespace();
@@ -58,7 +58,7 @@ class MigrateCommand extends Command
         }
     }
 
-    public function migrateModel(Model $model)
+    protected function migrateModel(Model $model)
     {
         $modelTable = $model->getTable();
         $tempTable = 'table_' . $modelTable;
