@@ -30,6 +30,8 @@ class ModelCommand extends GeneratorCommand
                 '--force' => $this->option('force'),
             ]);
         }
+
+        return 0;
     }
 
     protected function getStub()

@@ -3,6 +3,7 @@
 namespace DummyNamespace;
 
 use Faker\Generator;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
