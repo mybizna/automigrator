@@ -16,15 +16,16 @@ class DummyClass extends Authenticatable
 
     protected $guarded = [];
     protected $hidden = ['password', 'remember_token'];
+    protected $casts = ['email_verified_at' => 'datetime'];
 
     public function migration(Blueprint $table)
     {
         $table->id();
         $table->string('name');
         $table->string('email')->unique();
-        $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->rememberToken();
+        $table->timestamp('email_verified_at')->nullable();
         $table->timestamp('created_at')->nullable();
         $table->timestamp('updated_at')->nullable();
     }
