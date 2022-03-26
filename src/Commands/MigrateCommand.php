@@ -15,7 +15,7 @@ class MigrateCommand extends Command
 {
     use ConfirmableTrait;
     
-    protected $signature = 'lucid:migrate {--f|--fresh} {--s|--seed}';
+    protected $signature = 'lucid:migrate {--f|--fresh} {--s|--seed} {--force}';
 
     public function handle()
     {
