@@ -1,5 +1,5 @@
 {
-    "name": "legodion/lucid",
+    "name": "mybizna/lucid",
     "description": "Declare database migrations and factory definitions inside Laravel models.",
     "keywords": ["php", "laravel", "database", "migrations", "factory", "definitions", "models", "eloquent"],
     "license": "MIT",
