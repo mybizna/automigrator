@@ -101,7 +101,10 @@ class MigrateCommand extends Command
         });
 
         if (Schema::hasTable($modelTable)) {
+            
             $manager = $model->getConnection()->getDoctrineSchemaManager();
+            $manager->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+       
             $diff = (new Comparator)->diffTable($manager->listTableDetails($modelTable), $manager->listTableDetails($tempTable));
 
             if ($diff) {
