@@ -111,6 +111,8 @@ class MigrateCommand extends Command
                 $manager->alterTable($diff);
 
                 $this->line('<info>Table updated:</info> ' . $modelTable);
+            } else {
+                $this->line('Table is current: ' . $modelTable);
             }
 
             Schema::drop($tempTable);
