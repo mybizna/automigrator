@@ -14,7 +14,7 @@ use Symfony\Component\Finder\Finder;
 class MigrateCommand extends Command
 {
     use ConfirmableTrait;
-    
+
     protected $signature = 'lucid:migrate {--f|--fresh} {--s|--seed} {--force}';
 
     public function handle()
@@ -50,15 +50,25 @@ class MigrateCommand extends Command
 
             $dir = new \DirectoryIterator($modules_path);
 
+            print_r("\n");
+            print_r("\e[42m Paths Discovered \e[0m \n");
+            print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
+            print_r("\n");
+
             foreach ($dir as $fileinfo) {
                 if (!$fileinfo->isDot() && $fileinfo->isDir()) {
                     $module_name = $fileinfo->getFilename();
                     $module_path = $modules_path . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'Entities';
+                    print_r($module_path . "\n");
                     array_push($paths, ['namespace' => 'Modules\\'  . $module_name . '\\Entities', 'file' => $module_path]);
                 }
             }
-
         }
+
+        print_r("\n");
+        print_r("\e[42m Model Classes Discovered \e[0m \n");
+        print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
+        print_r("\n");
 
         foreach ($paths as $key => $path) {
 
@@ -73,14 +83,12 @@ class MigrateCommand extends Command
                 );
 
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
+                    print_r($model . "\n");
                     $models->push([
                         'object' => $object = app($model),
                         'order' => $object->migrationOrder ?? 0,
                     ]);
                 }
-
-
-
             }
         }
 
@@ -101,10 +109,10 @@ class MigrateCommand extends Command
         });
 
         if (Schema::hasTable($modelTable)) {
-            
+
             $manager = $model->getConnection()->getDoctrineSchemaManager();
             $manager->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-       
+
             $diff = (new Comparator)->diffTable($manager->listTableDetails($modelTable), $manager->listTableDetails($tempTable));
 
             if ($diff) {
