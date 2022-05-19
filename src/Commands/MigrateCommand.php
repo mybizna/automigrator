@@ -92,9 +92,17 @@ class MigrateCommand extends Command
             }
         }
 
+
+        print_r("\n");
+        print_r("\e[42m Process Tables \e[0m \n");
+        print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
+        print_r("\n");
+
         foreach ($models->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
         }
+
+
     }
 
     protected function migrateModel(Model $model)
