@@ -101,8 +101,6 @@ class MigrateCommand extends Command
         foreach ($models->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
         }
-
-
     }
 
     protected function migrateModel(Model $model)
@@ -114,6 +112,14 @@ class MigrateCommand extends Command
 
         Schema::create($tempTable, function (Blueprint $table) use ($model) {
             $model->migration($table);
+
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('delete_by')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
         });
 
         if (Schema::hasTable($modelTable)) {
