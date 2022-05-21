@@ -112,7 +112,8 @@ class MigrateCommand extends Command
 
         Schema::create($tempTable, function (Blueprint $table) use ($model) {
             $model->migration($table);
-
+            
+            $table->boolean('is_modified')->nullable();
 
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
