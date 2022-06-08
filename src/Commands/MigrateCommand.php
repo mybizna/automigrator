@@ -15,6 +15,8 @@ class MigrateCommand extends Command
 {
     use ConfirmableTrait;
 
+    private $models = [];
+
     protected $signature = 'lucid:migrate {--f|--fresh} {--s|--seed} {--force}';
 
     public function handle()
@@ -38,7 +40,6 @@ class MigrateCommand extends Command
     {
         $path = is_dir(app_path('Models')) ? app_path('Models') : app_path();
         $namespace = app()->getNamespace();
-        $models = collect();
 
         $paths = array();
 
@@ -83,14 +84,22 @@ class MigrateCommand extends Command
                 );
 
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
-                    print_r($model . "\n");
-                    $models->push([
-                        'object' => $object = app($model),
+
+                    $object = app($model);
+                    print_r($object->getTable() . "\n");
+
+                    $this->models[$object->getTable()] = [
+                        'object' => $object,
+                        'table' => $object->getTable(),
+                        'dependencies' => $object->migrationDependancy ?? [],
                         'order' => $object->migrationOrder ?? 0,
-                    ]);
+                        'processed' =>  false,
+                    ];
                 }
             }
         }
+
+        $this->updateOrder($this->models);
 
 
         print_r("\n");
@@ -98,7 +107,8 @@ class MigrateCommand extends Command
         print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
         print_r("\n");
 
-        foreach ($models->sortBy('order') as $model) {
+
+        foreach (collect($this->models)->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
         }
     }
@@ -112,8 +122,8 @@ class MigrateCommand extends Command
 
         Schema::create($tempTable, function (Blueprint $table) use ($model) {
             $model->migration($table);
-            
-            $table->boolean('is_modified')->nullable();
+
+            $table->boolean('is_modified')->default(false);
 
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
@@ -144,5 +154,45 @@ class MigrateCommand extends Command
 
             $this->line('<info>Table created:</info> ' . $modelTable);
         }
+
+        if (method_exists($model, 'post_migration')) {
+            Schema::table($modelTable, function (Blueprint $table) use ($model) {
+                $model->post_migration($table);
+            });
+        }
+    }
+
+    private function updateOrder()
+    {
+        foreach ($this->models as $table_name => $model) {
+            $this->processDependencies($table_name);
+        }
+    }
+
+    private function processDependencies($table_name)
+    {
+        $orders = [];
+
+        if (!empty($this->models[$table_name]['dependencies']) && !$this->models[$table_name]['processed']) {
+
+            foreach ($this->models[$table_name]['dependencies'] as $dependency) {
+                $this->processDependencies($dependency);
+
+                array_push($orders, $this->models[$dependency]['order']);
+            }
+
+            if (!empty($orders)) {
+
+                sort($orders);
+
+                $order = (int)array_pop($orders) + 1;
+
+                if ($order) {
+                    $this->models[$table_name]['order'] = $order;
+                }
+            }
+        }
+
+        $this->models[$table_name]['processed'] = true;
     }
 }
