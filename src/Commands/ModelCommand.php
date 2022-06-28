@@ -14,7 +14,7 @@ class ModelCommand extends GeneratorCommand
     {
         if (parent::handle() === false && !$this->option('force')) {
             return false;
-        }
+        } 
 
         if ($this->argument('name') == 'User') {
             $this->backupUserFiles();

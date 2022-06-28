@@ -13,7 +13,7 @@ use Symfony\Component\Finder\Finder;
 
 class MigrateCommand extends Command
 {
-    use ConfirmableTrait;
+    use ConfirmableTrait; 
 
     private $models = [];
 
