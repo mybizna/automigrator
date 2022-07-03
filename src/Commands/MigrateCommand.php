@@ -13,7 +13,7 @@ use Symfony\Component\Finder\Finder;
 
 class MigrateCommand extends Command
 {
-    use ConfirmableTrait; 
+    use ConfirmableTrait;
 
     private $models = [];
 
@@ -169,29 +169,40 @@ class MigrateCommand extends Command
         }
     }
 
-    private function processDependencies($table_name)
+    private function processDependencies($table_name, $call_count = 0)
     {
         $orders = [];
 
-        if (!empty($this->models[$table_name]['dependencies']) && !$this->models[$table_name]['processed']) {
+        if ($call_count > 20) {
+            print('Error processing dependencies. To many calls ' . $table_name . '.');
+            return;
+        }
 
-            foreach ($this->models[$table_name]['dependencies'] as $dependency) {
-                $this->processDependencies($dependency);
+        try {
+            if (!empty($this->models[$table_name]['dependencies']) && !$this->models[$table_name]['processed']) {
 
-                array_push($orders, $this->models[$dependency]['order']);
-            }
+                foreach ($this->models[$table_name]['dependencies'] as $dependency) {
+                    $this->processDependencies($dependency, $call_count + 1);
+                    array_push($orders, $this->models[$dependency]['order']);
+                }
 
-            if (!empty($orders)) {
+                if (!empty($orders)) {
 
-                sort($orders);
+                    sort($orders);
 
-                $order = (int)array_pop($orders) + 1;
+                    $order = (int)array_pop($orders) + 1;
 
-                if ($order) {
-                    $this->models[$table_name]['order'] = $order;
+                    if ($order) {
+                        $this->models[$table_name]['order'] = $order;
+                    }
                 }
             }
+        } catch (\Throwable $th) {
+            //throw $th;
+            print('Error with table ' . $table_name);
         }
+
+
 
         $this->models[$table_name]['processed'] = true;
     }
