@@ -111,14 +111,14 @@ class MigrateCommand extends Command
         foreach (collect($this->models)->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
         }
-    }
-
+    }  
+    
     protected function migrateModel(Model $model)
     {
+        $this->line('<info>' . get_class($model) . '</info>');
+
         $modelTable = $model->getTable();
         $tempTable = 'table_' . $modelTable;
-
-        $this->line('<info>Table Started: ' . $modelTable . '</info>');
 
         Schema::dropIfExists($tempTable);
 
@@ -145,16 +145,16 @@ class MigrateCommand extends Command
             if ($diff) {
                 $manager->alterTable($diff);
 
-                $this->line('Table updated.');
+                $this->line('Table '.$modelTable.' updated.');
             } else {
-                $this->line('Table is current.');
+                $this->line('Table '.$modelTable.' is current.');
             }
 
             Schema::drop($tempTable);
         } else {
             Schema::rename($tempTable, $modelTable);
 
-            $this->line('Table created.');
+            $this->line('Table '.$modelTable.' created.');
         }
 
         if (method_exists($model, 'post_migration')) {
@@ -170,6 +170,7 @@ class MigrateCommand extends Command
             }
         }
     }
+
 
     private function updateOrder()
     {
