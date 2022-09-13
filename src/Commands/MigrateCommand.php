@@ -118,6 +118,8 @@ class MigrateCommand extends Command
         $modelTable = $model->getTable();
         $tempTable = 'table_' . $modelTable;
 
+        $this->line('<info>Table Started: ' . $modelTable . '</info>');
+
         Schema::dropIfExists($tempTable);
 
         Schema::create($tempTable, function (Blueprint $table) use ($model) {
@@ -143,22 +145,29 @@ class MigrateCommand extends Command
             if ($diff) {
                 $manager->alterTable($diff);
 
-                $this->line('<info>Table updated:</info> ' . $modelTable);
+                $this->line('Table updated.');
             } else {
-                $this->line('Table is current: ' . $modelTable);
+                $this->line('Table is current.');
             }
 
             Schema::drop($tempTable);
         } else {
             Schema::rename($tempTable, $modelTable);
 
-            $this->line('<info>Table created:</info> ' . $modelTable);
+            $this->line('Table created.');
         }
 
         if (method_exists($model, 'post_migration')) {
-            Schema::table($modelTable, function (Blueprint $table) use ($model) {
-                $model->post_migration($table);
-            });
+            
+            try {
+                Schema::table($modelTable, function (Blueprint $table) use ($model) {
+                    $model->post_migration($table);
+                });
+                $this->line('Post Migration Successful.');
+            } catch (\Throwable $th) {
+                throw $th;
+                $this->line('Post Migration Failed.');
+            }
         }
     }
 
