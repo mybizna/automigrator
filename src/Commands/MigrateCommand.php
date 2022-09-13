@@ -86,15 +86,19 @@ class MigrateCommand extends Command
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
 
                     $object = app($model);
-                    print_r($object->getTable() . "\n");
+                    $table_name = $object->getTable();
 
-                    $this->models[$object->getTable()] = [
+                    //print_r($table_name . "\n");
+
+                    $this->models[$table_name] = [
                         'object' => $object,
-                        'table' => $object->getTable(),
+                        'table' => $table_name,
                         'dependencies' => $object->migrationDependancy ?? [],
                         'order' => $object->migrationOrder ?? 0,
                         'processed' =>  false,
                     ];
+
+                    print_r(" ".$this->models[$table_name]['order']." ".$table_name . "\n");
                 }
             }
         }
@@ -107,12 +111,12 @@ class MigrateCommand extends Command
         print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
         print_r("\n");
 
-
+         
         foreach (collect($this->models)->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
-        }
-    }  
-    
+        }exit;
+    }
+
     protected function migrateModel(Model $model)
     {
         $this->line('<info>' . get_class($model) . '</info>');
@@ -145,16 +149,16 @@ class MigrateCommand extends Command
             if ($diff) {
                 $manager->alterTable($diff);
 
-                $this->line('Table '.$modelTable.' updated.');
+                $this->line(' -- Table '.$modelTable.' updated.');
             } else {
-                $this->line('Table '.$modelTable.' is current.');
+                $this->line(' -- Table '.$modelTable.' is current.');
             }
 
             Schema::drop($tempTable);
         } else {
             Schema::rename($tempTable, $modelTable);
 
-            $this->line('Table '.$modelTable.' created.');
+            $this->line(' -- Table '.$modelTable.' created.');
         }
 
         if (method_exists($model, 'post_migration')) {
@@ -163,10 +167,10 @@ class MigrateCommand extends Command
                 Schema::table($modelTable, function (Blueprint $table) use ($model) {
                     $model->post_migration($table);
                 });
-                $this->line('Post Migration Successful.');
+                $this->line(' -- Post Migration Successful.');
             } catch (\Throwable $th) {
                 throw $th;
-                $this->line('Post Migration Failed.');
+                $this->line(' -- Post Migration Failed.');
             }
         }
     }
