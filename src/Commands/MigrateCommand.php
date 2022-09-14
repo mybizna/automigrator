@@ -88,7 +88,7 @@ class MigrateCommand extends Command
                     $object = app($model);
                     $table_name = $object->getTable();
 
-                    //print_r($table_name . "\n");
+                    print_r($table_name . "\n");
 
                     $this->models[$table_name] = [
                         'object' => $object,
@@ -98,7 +98,7 @@ class MigrateCommand extends Command
                         'processed' =>  false,
                     ];
 
-                    print_r(" ".$this->models[$table_name]['order']." ".$table_name . "\n");
+                    //print_r($table_name . "\n");
                 }
             }
         }
