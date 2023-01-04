@@ -8,12 +8,13 @@ use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Symfony\Component\Finder\Finder;
 
 class MigrateCommand extends Command
 {
     use ConfirmableTrait;
+
+    private $show_logs = false;
 
     private $models = [];
 
@@ -36,14 +37,17 @@ class MigrateCommand extends Command
         return 0;
     }
 
-    public function migrateModels()
+    public function migrateModels($show_logs = true)
     {
+
+        $this->show_logs = $show_logs;
+
         $path = is_dir(app_path('Models')) ? app_path('Models') : app_path();
         $namespace = app()->getNamespace();
 
         $paths = array();
 
-        array_push($paths, ['namespace' => $namespace  . 'Models', 'file' => $path]);
+        array_push($paths, ['namespace' => $namespace . 'Models', 'file' => $path]);
 
         $modules_path = realpath(base_path()) . DIRECTORY_SEPARATOR . 'Modules';
 
@@ -51,25 +55,19 @@ class MigrateCommand extends Command
 
             $dir = new \DirectoryIterator($modules_path);
 
-            print_r("\n");
-            print_r("\e[42m Paths Discovered \e[0m \n");
-            print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
-            print_r("\n");
+            $this->logOutput("Paths Discovered", 'title');
 
             foreach ($dir as $fileinfo) {
                 if (!$fileinfo->isDot() && $fileinfo->isDir()) {
                     $module_name = $fileinfo->getFilename();
                     $module_path = $modules_path . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'Entities';
-                    print_r($module_path . "\n");
-                    array_push($paths, ['namespace' => 'Modules\\'  . $module_name . '\\Entities', 'file' => $module_path]);
+                    $this->logOutput($module_path);
+                    array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
                 }
             }
         }
 
-        print_r("\n");
-        print_r("\e[42m Model Classes Discovered \e[0m \n");
-        print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
-        print_r("\n");
+        $this->logOutput("Model Classes Discovered", 'title');
 
         foreach ($paths as $key => $path) {
 
@@ -88,30 +86,24 @@ class MigrateCommand extends Command
                     $object = app($model);
                     $table_name = $object->getTable();
 
-                    print_r($table_name . "\n");
+                    $this->logOutput("$table_name");
 
                     $this->models[$table_name] = [
                         'object' => $object,
                         'table' => $table_name,
                         'dependencies' => $object->migrationDependancy ?? [],
                         'order' => $object->migrationOrder ?? 0,
-                        'processed' =>  false,
+                        'processed' => false,
                     ];
 
-                    //print_r($table_name . "\n");
                 }
             }
         }
 
         $this->updateOrder($this->models);
 
+        $this->logOutput("Process Tables", 'title');
 
-        print_r("\n");
-        print_r("\e[42m Process Tables \e[0m \n");
-        print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
-        print_r("\n");
-
-         
         foreach (collect($this->models)->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
         }exit;
@@ -119,7 +111,7 @@ class MigrateCommand extends Command
 
     protected function migrateModel(Model $model)
     {
-        $this->line('<info>' . get_class($model) . '</info>');
+        $this->logOutput(get_class($model));
 
         $modelTable = $model->getTable();
         $tempTable = 'table_' . $modelTable;
@@ -149,32 +141,31 @@ class MigrateCommand extends Command
             if ($diff) {
                 $manager->alterTable($diff);
 
-                $this->line(' -- Table '.$modelTable.' updated.');
+                $this->logOutput(' -- Table ' . $modelTable . ' updated.');
             } else {
-                $this->line(' -- Table '.$modelTable.' is current.');
+                $this->logOutput(' -- Table ' . $modelTable . ' is current.');
             }
 
             Schema::drop($tempTable);
         } else {
             Schema::rename($tempTable, $modelTable);
 
-            $this->line(' -- Table '.$modelTable.' created.');
+            $this->logOutput(' -- Table ' . $modelTable . ' created.');
         }
 
         if (method_exists($model, 'post_migration')) {
-            
+
             try {
                 Schema::table($modelTable, function (Blueprint $table) use ($model) {
                     $model->post_migration($table);
                 });
-                $this->line(' -- Post Migration Successful.');
-            } catch (\Throwable $th) {
+                $this->logOutput(' -- Post Migration Successful.');
+            } catch (\Throwable$th) {
                 throw $th;
-                $this->line(' -- Post Migration Failed.');
+                $this->logOutput(' -- Post Migration Failed.');
             }
         }
     }
-
 
     private function updateOrder()
     {
@@ -188,7 +179,7 @@ class MigrateCommand extends Command
         $orders = [];
 
         if ($call_count > 20) {
-            print('Error processing dependencies. To many calls ' . $table_name . '.');
+            $this->logOutput('Error processing dependencies. To many calls ' . $table_name . '.');
             return;
         }
 
@@ -204,20 +195,34 @@ class MigrateCommand extends Command
 
                     sort($orders);
 
-                    $order = (int)array_pop($orders) + 1;
+                    $order = (int) array_pop($orders) + 1;
 
                     if ($order) {
                         $this->models[$table_name]['order'] = $order;
                     }
                 }
             }
-        } catch (\Throwable $th) {
+        } catch (\Throwable$th) {
             //throw $th;
-            print('Error with table ' . $table_name);
+            $this->logOutput('Error with table ' . $table_name);
         }
 
-
-
         $this->models[$table_name]['processed'] = true;
+    }
+
+    private function logOutput($message, $type = 'info')
+    {
+        if ($this->show_logs) {
+
+            if ($type == 'title') {
+                print_r("\n");
+                print_r("\e[42m " . $message . " \e[0m \n");
+                print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
+                print_r("\n");
+
+            }
+
+            print($message . "\n");
+        }
     }
 }
