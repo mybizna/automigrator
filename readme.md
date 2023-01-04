@@ -11,7 +11,7 @@ The `lucid:migrate` command will also run your file-based (traditional) Laravel 
 Require this package via Composer:
 
 ```console
-composer require legodion/lucid
+composer require mybizna/lucid
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ Use the `HasNewFactory` trait, and declare `migration` and `definition` methods 
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use Legodion\Lucid\Traits\HasNewFactory;
+use Mybizna\Lucid\Traits\HasNewFactory;
 
 class MyModel extends Model
 {
