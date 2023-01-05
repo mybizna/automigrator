@@ -106,7 +106,7 @@ class MigrateCommand extends Command
 
         foreach (collect($this->models)->sortBy('order') as $model) {
             $this->migrateModel($model['object']);
-        }exit;
+        }
     }
 
     protected function migrateModel(Model $model)
