@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Finder\Finder;
+use Illuminate\Support\Facades\Log;
 
 class MigrateCommand extends Command
 {
