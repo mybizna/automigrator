@@ -213,16 +213,14 @@ class MigrateCommand extends Command
     private function logOutput($message, $type = 'info')
     {
         if ($this->show_logs) {
-
             if ($type == 'title') {
-                print_r("\n");
-                print_r("\e[42m " . $message . " \e[0m \n");
-                print_r("\033[32mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\033[0m\n");
-                print_r("\n");
-
+                Log::channel('migration')->info('');
+                Log::channel('migration')->info($message);
+                Log::channel('migration')->info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+                Log::channel('migration')->info('');
+            } else {
+                Log::channel('migration')->info($message);
             }
-
-            print($message . "\n");
         }
     }
 }

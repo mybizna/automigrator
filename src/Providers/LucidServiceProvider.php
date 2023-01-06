@@ -11,6 +11,9 @@ class LucidServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+
+        $this->initializeConfig();
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MigrateCommand::class,
@@ -18,5 +21,16 @@ class LucidServiceProvider extends ServiceProvider
                 ResourceCommand::class,
             ]);
         }
+    }
+
+    private function initializeConfig()
+    {
+        $logging_config = $this->app['config']->get('logging', []);
+        $logging_config['channels']['migration'] = [
+            'driver' => 'single',
+            'path' => storage_path('logs/migration.log'),
+        ];
+        $this->app['config']->set('logging', $logging_config);
+
     }
 }
