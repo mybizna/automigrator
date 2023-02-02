@@ -1,6 +1,6 @@
 <?php
 
-namespace Legodion\Lucid\Commands;
+namespace Mybizna\Lucid\Commands;
 
 use Doctrine\DBAL\Schema\Comparator;
 use Illuminate\Console\Command;

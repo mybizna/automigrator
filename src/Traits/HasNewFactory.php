@@ -1,6 +1,6 @@
 <?php
 
-namespace Legodion\Lucid\Traits;
+namespace Mybizna\Lucid\Traits;
 
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;

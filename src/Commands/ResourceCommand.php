@@ -1,6 +1,6 @@
 <?php
 
-namespace Legodion\Lucid\Commands;
+namespace Mybizna\Lucid\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
