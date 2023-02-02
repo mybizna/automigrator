@@ -1,13 +1,13 @@
 <?php
 
-namespace Mybizna\Lucid\Commands;
+namespace Mybizna\Automigrator\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelCommand extends GeneratorCommand
 {
-    protected $name = 'lucid:model';
+    protected $name = 'automigrator:model';
     protected $type = 'Model';
 
     public function handle()
@@ -21,7 +21,7 @@ class ModelCommand extends GeneratorCommand
         }
 
         if ($this->option('resource')) {
-            $this->call('lucid:resource', [
+            $this->call('automigrator:resource', [
                 'name' => $this->argument('name'),
                 '--force' => $this->option('force'),
             ]);

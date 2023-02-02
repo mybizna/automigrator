@@ -1,13 +1,13 @@
 <?php
 
-namespace Mybizna\Lucid\Providers;
+namespace Mybizna\Automigrator\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Mybizna\Lucid\Commands\MigrateCommand;
-use Mybizna\Lucid\Commands\ModelCommand;
-use Mybizna\Lucid\Commands\ResourceCommand;
+use Mybizna\Automigrator\Commands\MigrateCommand;
+use Mybizna\Automigrator\Commands\ModelCommand;
+use Mybizna\Automigrator\Commands\ResourceCommand;
 
-class LucidServiceProvider extends ServiceProvider
+class AutomigratorServiceProvider extends ServiceProvider
 {
     public function boot()
     {

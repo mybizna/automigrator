@@ -1,6 +1,6 @@
 <?php
 
-namespace Mybizna\Lucid\Traits;
+namespace Mybizna\Automigrator\Traits;
 
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;

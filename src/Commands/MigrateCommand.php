@@ -1,6 +1,6 @@
 <?php
 
-namespace Mybizna\Lucid\Commands;
+namespace Mybizna\Automigrator\Commands;
 
 use Doctrine\DBAL\Schema\Comparator;
 use Illuminate\Console\Command;
@@ -19,7 +19,7 @@ class MigrateCommand extends Command
 
     private $models = [];
 
-    protected $signature = 'lucid:migrate {--f|--fresh} {--s|--seed} {--force}';
+    protected $signature = 'automigrator:migrate {--f|--fresh} {--s|--seed} {--force}';
 
     public function handle()
     {
