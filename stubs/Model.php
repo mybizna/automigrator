@@ -5,7 +5,7 @@ namespace DummyNamespace;
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use Legodion\Lucid\Traits\HasNewFactory;
+use Mybizna\Automigrator\Traits\HasNewFactory;
 
 class DummyClass extends Model
 {

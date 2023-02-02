@@ -12,20 +12,20 @@
     "eloquent"
   ],
   "license": "MIT",
-  "version": "1.2.58",
+  "version": "1.2.56",
   "require": {
     "doctrine/dbal": "^2.0|^3.0",
     "laravel/framework": "^7.0|^8.0|^9.0"
   },
   "autoload": {
     "psr-4": {
-      "Legodion\\Lucid\\": "src"
+      "Mybizna\\Automigrator\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Legodion\\Lucid\\Providers\\LucidServiceProvider"
+        "Mybizna\\Automigrator\\Providers\\AutomigratorServiceProvider"
       ]
     }
   }
