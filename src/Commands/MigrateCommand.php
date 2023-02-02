@@ -7,9 +7,10 @@ use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Finder\Finder;
-use Illuminate\Support\Facades\Log;
 
 class MigrateCommand extends Command
 {
@@ -63,7 +64,10 @@ class MigrateCommand extends Command
                     $module_name = $fileinfo->getFilename();
                     $module_path = $modules_path . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'Entities';
                     $this->logOutput($module_path);
-                    array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
+
+                    if (File::isDirectory($asset_folder)) {
+                        array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
+                    }
                 }
             }
         }
