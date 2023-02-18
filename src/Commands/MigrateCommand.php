@@ -65,7 +65,7 @@ class MigrateCommand extends Command
                     $module_path = $modules_path . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'Entities';
                     $this->logOutput($module_path);
 
-                    if (File::isDirectory($asset_folder)) {
+                    if (File::isDirectory($module_path)) {
                         array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
                     }
                 }
