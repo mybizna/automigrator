@@ -17,6 +17,7 @@ class MigrateCommand extends Command
     use ConfirmableTrait;
 
     private $show_logs = false;
+    private $file_logging = false;
 
     private $models = [];
 
@@ -217,14 +218,27 @@ class MigrateCommand extends Command
 
     private function logOutput($message, $type = 'info')
     {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+
         if ($this->show_logs) {
             if ($type == 'title') {
-                Log::channel('migration')->info('');
-                Log::channel('migration')->info($message);
-                Log::channel('migration')->info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-                Log::channel('migration')->info('');
+                if ($this->file_logging) {
+                    Log::channel('migration')->info('');
+                    Log::channel('migration')->info($message);
+                    Log::channel('migration')->info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+                    Log::channel('migration')->info('');
+                } else {
+                    $output->writeln("<info></info>");
+                    $output->writeln("<info>$message</info>");
+                    $output->writeln("<info>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</info>");
+                    $output->writeln("<info></info>");
+                }
             } else {
-                Log::channel('migration')->info($message);
+                if ($this->file_logging) {
+                    Log::channel('migration')->info($message);
+                } else {
+                    $output->writeln("<info>$message</info>");
+                }
             }
         }
     }
