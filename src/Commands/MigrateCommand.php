@@ -25,6 +25,7 @@ class MigrateCommand extends Command
 
     public function handle()
     {
+
         if (!$this->confirmToProceed()) {
             return 1;
         }
@@ -46,32 +47,31 @@ class MigrateCommand extends Command
         $this->show_logs = $show_logs;
 
         $path = is_dir(app_path('Models')) ? app_path('Models') : app_path();
+
         $namespace = app()->getNamespace();
 
         $paths = array();
 
         array_push($paths, ['namespace' => $namespace . 'Models', 'file' => $path]);
 
-        $modules_path = realpath(base_path()) . DIRECTORY_SEPARATOR . 'Modules';
+        $groups = (is_file('../readme.txt')) ? ['Modules/*', '../../*/Modules/*'] : ['Modules/*'];
+        foreach ($groups as $key => $group) {
+            $tmp_paths = glob(base_path($group));
 
-        if (is_dir($modules_path)) {
+            foreach ($tmp_paths as $key => $tmp_path) {
+                $path_arr = array_reverse(explode('/', $tmp_path));
 
-            $dir = new \DirectoryIterator($modules_path);
+                $module_name = $path_arr[0];
+                $module_path =$tmp_path . DIRECTORY_SEPARATOR . 'Entities';
+                
+                $this->logOutput($module_path);
 
-            $this->logOutput("Paths Discovered", 'title');
-
-            foreach ($dir as $fileinfo) {
-                if (!$fileinfo->isDot() && $fileinfo->isDir()) {
-                    $module_name = $fileinfo->getFilename();
-                    $module_path = $modules_path . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'Entities';
-                    $this->logOutput($module_path);
-
-                    if (File::isDirectory($module_path)) {
-                        array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
-                    }
+                if (File::isDirectory($module_path)) {
+                    array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
                 }
             }
         }
+
 
         $this->logOutput("Model Classes Discovered", 'title');
 
@@ -80,13 +80,13 @@ class MigrateCommand extends Command
             foreach ((new Finder)->in($path['file'])->files() as $model) {
 
                 $real_path_arr = array_reverse(explode(DIRECTORY_SEPARATOR, $model->getRealPath()));
-
+               
                 $model = $path['namespace'] . str_replace(
                     ['/', '.php'],
                     ['\\', ''],
                     '\\' . $real_path_arr[0]
                 );
-
+            
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
 
                     $object = app($model);
