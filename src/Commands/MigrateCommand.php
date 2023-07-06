@@ -54,7 +54,7 @@ class MigrateCommand extends Command
 
         array_push($paths, ['namespace' => $namespace . 'Models', 'file' => $path]);
 
-        $groups = (is_file('../readme.txt')) ? ['Modules/*', '../../*/Modules/*'] : ['Modules/*'];
+        $groups = (is_file(base_path('../readme.txt'))) ? ['Modules/*', '../../*/Modules/*'] : ['Modules/*'];
         foreach ($groups as $key => $group) {
             $tmp_paths = glob(base_path($group));
 
