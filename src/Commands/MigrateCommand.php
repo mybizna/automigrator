@@ -111,7 +111,9 @@ class MigrateCommand extends Command
         $this->logOutput("Process Tables", 'title');
 
         foreach (collect($this->models)->sortBy('order') as $model) {
-            $this->migrateModel($model['object']);
+            if(isset($model['object'])){
+                $this->migrateModel($model['object']);
+            }
         }
     }
 
