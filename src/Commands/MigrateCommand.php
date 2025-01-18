@@ -62,12 +62,12 @@ class MigrateCommand extends Command
                 $path_arr = array_reverse(explode('/', $tmp_path));
 
                 $module_name = $path_arr[0];
-                $module_path =$tmp_path . DIRECTORY_SEPARATOR . 'Entities';
+                $module_path =$tmp_path . DIRECTORY_SEPARATOR . 'Models';
                 
                 $this->logOutput($module_path);
 
                 if (File::isDirectory($module_path)) {
-                    array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Entities', 'file' => $module_path]);
+                    array_push($paths, ['namespace' => 'Modules\\' . $module_name . '\\Models', 'file' => $module_path]);
                 }
             }
         }
