@@ -141,14 +141,11 @@ class MigrateCommand extends Command
 
         if (Schema::hasTable($modelTable)) {
 
-            $manager = $model->getConnection()->getDoctrineSchemaManager();
-            $manager->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+            $table_comparator = new TableComparator();
 
-            $diff = (new Comparator)->diffTable($manager->listTableDetails($modelTable), $manager->listTableDetails($tempTable));
-
-            if ($diff) {
-                $manager->alterTable($diff);
-
+            $was_updated = $table_comparator->compareTables($modelTable, $tempTable);
+            
+            if ($was_updated) {
                 $this->logOutput(' -- Table ' . $modelTable . ' updated.');
             } else {
                 $this->logOutput(' -- Table ' . $modelTable . ' is current.');
