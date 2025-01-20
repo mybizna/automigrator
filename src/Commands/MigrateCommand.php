@@ -8,6 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Symfony\Component\Finder\Finder;
 
 class MigrateCommand extends Command
@@ -73,8 +74,6 @@ class MigrateCommand extends Command
         $this->logOutput("Model Classes Discovered", 'title');
 
         foreach ($paths as $key => $path) {
-            print_r($path);
-            print_r("\n");
 
             foreach ((new Finder)->in($path['file'])->files() as $model) {
 
@@ -85,9 +84,6 @@ class MigrateCommand extends Command
                     ['\\', ''],
                     '\\' . $real_path_arr[0]
                 );
-
-                print_r($model);
-                print_r("\n");
 
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
 
@@ -124,33 +120,34 @@ class MigrateCommand extends Command
         $this->logOutput(get_class($model));
 
         $modelTable = $model->getTable();
-        $tempTable  = 'table_' . $modelTable;
+        $tempTable  = $modelTable . '_' . Str::random(6);
 
         Schema::dropIfExists($tempTable);
 
-        Schema::withoutForeignKeyConstraints(function () use ($model, $tempTable): void {
+        Schema::create($tempTable, function (Blueprint $table) use ($model) {
+            $model->migration($table);
 
-            Schema::create($tempTable, function (Blueprint $table) use ($model): void {
-                $table->id();
+            $table->boolean('is_modified')->default(false);
 
-                $model->migration($table);
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('delete_by')->nullable();
 
-                $table->boolean('is_modified')->default(false);
-
-                $table->unsignedBigInteger('created_by')->nullable();
-                $table->unsignedBigInteger('updated_by')->nullable();
-                $table->unsignedBigInteger('delete_by')->nullable();
-
-                $table->timestamps();
-                $table->softDeletes();
-            });
+            $table->timestamps();
+            $table->softDeletes();
         });
 
         if (Schema::hasTable($modelTable)) {
 
             $table_comparator = new TableComparator();
 
-            $table_comparator->compareTables($tempTable, $modelTable);
+            $was_updated = $table_comparator->compareTables($modelTable, $tempTable);
+
+            if ($was_updated) {
+                $this->logOutput(' -- Table ' . $modelTable . ' updated.');
+            } else {
+                $this->logOutput(' -- Table ' . $modelTable . ' is current.');
+            }
 
             Schema::drop($tempTable);
         } else {
