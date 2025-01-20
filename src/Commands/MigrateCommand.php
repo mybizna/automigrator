@@ -1,8 +1,6 @@
 <?php
-
 namespace Mybizna\Automigrator\Commands;
 
-use Doctrine\DBAL\Schema\Comparator;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +14,7 @@ class MigrateCommand extends Command
 {
     use ConfirmableTrait;
 
-    private $show_logs = false;
+    private $show_logs    = false;
     private $file_logging = false;
 
     private $models = [];
@@ -26,7 +24,7 @@ class MigrateCommand extends Command
     public function handle()
     {
 
-        if (!$this->confirmToProceed()) {
+        if (! $this->confirmToProceed()) {
             return 1;
         }
 
@@ -50,7 +48,7 @@ class MigrateCommand extends Command
 
         $namespace = app()->getNamespace();
 
-        $paths = array();
+        $paths = [];
 
         array_push($paths, ['namespace' => $namespace . 'Models', 'file' => $path]);
 
@@ -62,8 +60,8 @@ class MigrateCommand extends Command
                 $path_arr = array_reverse(explode('/', $tmp_path));
 
                 $module_name = $path_arr[0];
-                $module_path =$tmp_path . DIRECTORY_SEPARATOR . 'Models';
-                
+                $module_path = $tmp_path . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Models';
+
                 $this->logOutput($module_path);
 
                 if (File::isDirectory($module_path)) {
@@ -72,34 +70,38 @@ class MigrateCommand extends Command
             }
         }
 
-
         $this->logOutput("Model Classes Discovered", 'title');
 
         foreach ($paths as $key => $path) {
+            print_r($path);
+            print_r("\n");
 
             foreach ((new Finder)->in($path['file'])->files() as $model) {
 
                 $real_path_arr = array_reverse(explode(DIRECTORY_SEPARATOR, $model->getRealPath()));
-               
+
                 $model = $path['namespace'] . str_replace(
                     ['/', '.php'],
                     ['\\', ''],
                     '\\' . $real_path_arr[0]
                 );
-            
+
+                print_r($model);
+                print_r("\n");
+
                 if (is_subclass_of($model, Model::class) && method_exists($model, 'migration')) {
 
-                    $object = app($model);
+                    $object     = app($model);
                     $table_name = $object->getTable();
 
                     $this->logOutput("$table_name");
 
                     $this->models[$table_name] = [
-                        'object' => $object,
-                        'table' => $table_name,
+                        'object'       => $object,
+                        'table'        => $table_name,
                         'dependencies' => $object->migrationDependancy ?? [],
-                        'order' => $object->migrationOrder ?? 0,
-                        'processed' => false,
+                        'order'        => $object->migrationOrder ?? 0,
+                        'processed'    => false,
                     ];
 
                 }
@@ -111,7 +113,7 @@ class MigrateCommand extends Command
         $this->logOutput("Process Tables", 'title');
 
         foreach (collect($this->models)->sortBy('order') as $model) {
-            if(isset($model['object'])){
+            if (isset($model['object'])) {
                 $this->migrateModel($model['object']);
             }
         }
@@ -122,34 +124,33 @@ class MigrateCommand extends Command
         $this->logOutput(get_class($model));
 
         $modelTable = $model->getTable();
-        $tempTable = 'table_' . $modelTable;
+        $tempTable  = 'table_' . $modelTable;
 
         Schema::dropIfExists($tempTable);
 
-        Schema::create($tempTable, function (Blueprint $table) use ($model) {
-            $model->migration($table);
+        Schema::withoutForeignKeyConstraints(function () use ($model, $tempTable): void {
 
-            $table->boolean('is_modified')->default(false);
+            Schema::create($tempTable, function (Blueprint $table) use ($model): void {
+                $table->id();
 
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->unsignedBigInteger('delete_by')->nullable();
+                $model->migration($table);
 
-            $table->timestamps();
-            $table->softDeletes();
+                $table->boolean('is_modified')->default(false);
+
+                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedBigInteger('updated_by')->nullable();
+                $table->unsignedBigInteger('delete_by')->nullable();
+
+                $table->timestamps();
+                $table->softDeletes();
+            });
         });
 
         if (Schema::hasTable($modelTable)) {
 
             $table_comparator = new TableComparator();
 
-            $was_updated = $table_comparator->compareTables($modelTable, $tempTable);
-            
-            if ($was_updated) {
-                $this->logOutput(' -- Table ' . $modelTable . ' updated.');
-            } else {
-                $this->logOutput(' -- Table ' . $modelTable . ' is current.');
-            }
+            $table_comparator->compareTables($tempTable, $modelTable);
 
             Schema::drop($tempTable);
         } else {
@@ -165,7 +166,7 @@ class MigrateCommand extends Command
                     $model->post_migration($table);
                 });
                 $this->logOutput(' -- Post Migration Successful.');
-            } catch (\Throwable$th) {
+            } catch (\Throwable $th) {
                 throw $th;
                 $this->logOutput(' -- Post Migration Failed.');
             }
@@ -189,14 +190,14 @@ class MigrateCommand extends Command
         }
 
         try {
-            if (!empty($this->models[$table_name]['dependencies']) && !$this->models[$table_name]['processed']) {
+            if (! empty($this->models[$table_name]['dependencies']) && ! $this->models[$table_name]['processed']) {
 
                 foreach ($this->models[$table_name]['dependencies'] as $dependency) {
                     $this->processDependencies($dependency, $call_count + 1);
                     array_push($orders, $this->models[$dependency]['order']);
                 }
 
-                if (!empty($orders)) {
+                if (! empty($orders)) {
 
                     sort($orders);
 
@@ -207,7 +208,7 @@ class MigrateCommand extends Command
                     }
                 }
             }
-        } catch (\Throwable$th) {
+        } catch (\Throwable $th) {
             //throw $th;
             $this->logOutput('Error with table ' . $table_name);
         }

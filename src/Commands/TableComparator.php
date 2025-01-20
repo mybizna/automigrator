@@ -35,7 +35,6 @@ class TableComparator
             $schemaManager->alterTable($diff);
 
             return true; // Return true if there were changes and they were applied
-
         }
 
         return false; // Return false if no changes were found
