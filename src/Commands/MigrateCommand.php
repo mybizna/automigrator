@@ -125,6 +125,9 @@ class MigrateCommand extends Command
         Schema::dropIfExists($tempTable);
 
         Schema::create($tempTable, function (Blueprint $table) use ($model) {
+
+            $table->id();
+            
             $model->migration($table);
 
             $table->boolean('is_modified')->default(false);

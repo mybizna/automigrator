@@ -25,9 +25,9 @@ class TableComparator
         $schemaManager = $this->connection->createSchemaManager();
         $platform      = $this->connection->getDatabasePlatform();
 
-        $modelTableDetails = $schemaManager->introspectTable($tmpTable);
-        $tempTableDetails  = $schemaManager->introspectTable($mainTable);
-
+        $modelTableDetails = $schemaManager->introspectTable($mainTable);
+        $tempTableDetails  = $schemaManager->introspectTable($tmpTable);
+        
         $comparator = new Comparator($platform);
         $diff       = $comparator->compareTables($modelTableDetails, $tempTableDetails);
 
